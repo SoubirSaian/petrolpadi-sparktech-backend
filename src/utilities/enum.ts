@@ -3,9 +3,11 @@ export const ENUM_USER_ROLE = {
   SUPPLIER: 'Supplier',
 };
 
-export const ENUM_PAYMENT_STATUS = {
+export const ENUM_ORDER_STATUS = {
   PENDING: 'Pending',
-  SUCCESS: 'Success',
+  ACCEPTED: 'Accepted',
+  ON_THE_WAY: 'On_The_Way',
+  COMPLETED: 'Completed'
 };
 
 export const ENUM_USER_STATUS = {
