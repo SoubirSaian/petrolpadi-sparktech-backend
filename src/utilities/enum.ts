@@ -18,9 +18,10 @@ export const ENUM_FUEL_TYPE = {
 }
 
 export const ENUM_PAYMENT_STATUS = {
-  PAID: 'PAID',
-  UNPAID: 'UNPAID',
-  REFUNDED: 'Refunded'
+  PENDING : "Pending",
+  SUCCESS : "Success",
+  FAILED : "Failed",
+  REFUNDED : "Refunded",
 }
 
 

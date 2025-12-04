@@ -32,12 +32,13 @@ export default {
 //     api_secret: process.env.API_SECRET,
 //     cloudinary_url: process.env.CLOUDINARY_URL,
 //   },
-//   stripe: {
-//     stripe_secret_key: process.env.STRIPE_SECRET_KEY,
-//     stripe_webhook_secret_test: process.env.STRIPE_WEBHOOK_SECRET_TEST,
-//     stripe_webhook_secret_production:
-//       process.env.STRIPE_WEBHOOK_SECRET_PRODUCTION,
-//   },
+paystack: {
+    paystack_secret_key: process.env.PAYSTACK_SECRET_KEY,
+    paystack_public_key: process.env.PAYSTACK_PUBLIC_KEY,
+    paystack_base_url: process.env.PAYSTACK_BASE_URL,
+    paystack_webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
+    
+  },
 //   variables: {
 //     email_temp_image: process.env.EMAIL_TEMP_IMAGE,
 //     email_temp_text_secondary_color:

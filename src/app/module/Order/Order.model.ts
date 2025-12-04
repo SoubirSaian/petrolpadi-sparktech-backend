@@ -7,6 +7,7 @@ const OrderSchema = new Schema<IOrder>({
     customer: { type: Schema.Types.ObjectId, required: true, ref: "Customer" },
     supplier: { type: Schema.Types.ObjectId, ref: "Supplier" },
     status: { type: String, enum: Object.values(ENUM_ORDER_STATUS),default: ENUM_ORDER_STATUS.PENDING },
+    paymentStatus: {type: String, enum:["Unpaid","Paid","Refunded"], default: "Unpaid"},
     fuelType: {type: String, enum: Object.values(ENUM_FUEL_TYPE)},
     priceRate: { type: Number, required: true },
     quantity: { type: Number, required:true },

@@ -4,11 +4,14 @@ import cookieParser from 'cookie-parser';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import notFound from './app/middlewares/notFound';
 import allRouter from './app/routes/allRoutes';
+import paymentRouter from './app/module/Payment/Payment.routes';
 
 
 
 const app: Application = express();
 
+//use webhook route before app.use(express.json())
+app.use("/paystack", paymentRouter);
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));

@@ -1,0 +1,123 @@
+import { Request, Response } from "express";
+import PaymentModel from "./Payment.model";
+import { ENUM_PAYMENT_STATUS } from "../../../utilities/enum";
+
+export const paystackWebhookHandler = async (req: Request, res: Response) => {
+  const event = req.body.event;
+  const eventData = req.body.data;
+
+  
+  //webhook will hit after refund also
+  try {
+      if (event === "charge.success") {
+        console.log("Payment Confirmed: webhook hit. ", eventData);
+    
+        // TODO: 
+        // - update order/payment record in DB
+        const payment = await PaymentModel.findOneAndUpdate(
+            { reference: eventData.reference },
+            {
+            status: ENUM_PAYMENT_STATUS.SUCCESS,
+            channel: eventData.channel,
+            transactionId: eventData.id,
+            paidAt: eventData.paid_at,
+            },
+            { new: true }
+        );
+        console.log("webhook payment data =====: ", payment);
+        // - send email to user
+    
+        return res.status(200).send("Webhook received");
+      }
+        // Handle Refund Processed
+        else if (event === "refund.processed" || event === "charge.refund") {
+
+            const reference = eventData?.transaction?.reference;
+
+            console.log("Refund processed webhook hit",eventData);
+
+            if (!reference) {
+                return res.status(400).send("No reference found");
+            }
+
+            // Get existing payment record
+            const payment = await PaymentModel.findOne({ reference });
+
+            if (!payment) {
+                // logger?.error?.(`Refund webhook: payment not found for ${reference}`);
+                return res.status(404).send("Payment not found");
+            }
+
+            // Idempotency — avoid double update
+            if (payment.status === ENUM_PAYMENT_STATUS.REFUNDED) {
+                return res.status(200).send("Refund already handled");
+            }
+
+            // Update Payment record
+            await PaymentModel.findOneAndUpdate(
+                { reference },
+                {
+                    status: ENUM_PAYMENT_STATUS.REFUNDED,
+                    metadata: {
+                        ...payment.metadata,
+                        refund: {
+                        refundId: eventData.id,
+                        refundedAmount: eventData.amount / 100,
+                        currency: eventData.currency,
+                        refundedAt: eventData.processed_at,
+                        reason: eventData.reason,
+                        },
+                    },
+                }
+            );
+
+            // OPTIONAL: update the related order
+            // if (payment.orderId) {
+            //     await OrderModel.findByIdAndUpdate(payment.orderId, {
+            //     status: "refunded",
+            //     });
+            // }
+
+            // logger?.info?.(`Refund processed for ${reference}`);
+
+            return res.status(200).send("Refund processed");
+
+        }
+
+        // Handle Refund Failure
+        else if (event === "refund.failed") {
+            const reference = eventData?.transaction?.reference;
+
+            // logger?.error?.("Refund failed: ", data);
+            console.log("Refund failed webhook hit.", eventData);
+
+            // You can store failure logs
+            await PaymentModel.findOneAndUpdate(
+                { reference },
+                {
+                metadata: {
+                    refundFailure: {
+                    refundId: eventData.id,
+                    amount: eventData.amount / 100,
+                    failedAt: new Date(),
+                    reason: eventData.status || "unknown",
+                    },
+                },
+            }
+            );
+
+            return res.status(200).send("Refund failure logged");
+        }
+
+        return res.status(200).send("Event ignored");
+
+    } catch (error: any) {
+        console.error("Refund webhook error:", error.message);
+        return res.status(500).send("Webhook Error");
+    }
+};
+
+
+//   console.log("webhook failed to hit.")
+//   return res.status(200).send("Event ignored");
+// };

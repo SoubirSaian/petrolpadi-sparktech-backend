@@ -18,6 +18,9 @@ async function main() {
     //database connection
     await mongoDBConnection();
     // logger.info('DB Connected Successfully');
+    
+    // call run cron job
+    runCronJobEverydatAtNight();
 
     myServer = app.listen(port, () => {
     //   logger.info(`Server running on http://0.0.0.0:${port}`);
@@ -25,8 +28,6 @@ async function main() {
         console.log("Server hitting : http://10.10.20.57:8001");
     });
 
-    // call run cron job
-    runCronJobEverydatAtNight();
 
     // Global unhandled rejection handler
     process.on('unhandledRejection', (error) => {

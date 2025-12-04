@@ -4,6 +4,7 @@ export interface IOrder {
     customer: Types.ObjectId ;
     supplier: Types.ObjectId ;
     status : string;
+    paymentStatus: string;
     fuelType: string;
     priceRate: number;
     quantity: number;
