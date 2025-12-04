@@ -15,7 +15,7 @@ export const paystackWebhookHandler = async (req: Request, res: Response) => {
         // TODO: 
         // - update order/payment record in DB
         const payment = await PaymentModel.findOneAndUpdate(
-            { reference: eventData.reference },
+            { reference: eventData?.reference },
             {
             status: ENUM_PAYMENT_STATUS.SUCCESS,
             channel: eventData.channel,
@@ -25,7 +25,9 @@ export const paystackWebhookHandler = async (req: Request, res: Response) => {
             { new: true }
         );
         console.log("webhook payment data =====: ", payment);
+
         // - send email to user
+        // send notification to user, admin
     
         return res.status(200).send("Webhook received");
       }
@@ -37,7 +39,7 @@ export const paystackWebhookHandler = async (req: Request, res: Response) => {
             console.log("Refund processed webhook hit",eventData);
 
             if (!reference) {
-                return res.status(400).send("No reference found");
+                return res.status(400).send("No reference found to update payment after refund");
             }
 
             // Get existing payment record
@@ -45,7 +47,7 @@ export const paystackWebhookHandler = async (req: Request, res: Response) => {
 
             if (!payment) {
                 // logger?.error?.(`Refund webhook: payment not found for ${reference}`);
-                return res.status(404).send("Payment not found");
+                return res.status(404).send("Payment not found to update with status refund.");
             }
 
             // Idempotency — avoid double update
@@ -61,11 +63,11 @@ export const paystackWebhookHandler = async (req: Request, res: Response) => {
                     metadata: {
                         ...payment.metadata,
                         refund: {
-                        refundId: eventData.id,
-                        refundedAmount: eventData.amount / 100,
-                        currency: eventData.currency,
-                        refundedAt: eventData.processed_at,
-                        reason: eventData.reason,
+                            refundId: eventData.id,
+                            refundedAmount: eventData.amount / 100,
+                            currency: eventData.currency,
+                            refundedAt: eventData.processed_at,
+                            reason: eventData.reason,
                         },
                     },
                 }
@@ -74,7 +76,7 @@ export const paystackWebhookHandler = async (req: Request, res: Response) => {
             // OPTIONAL: update the related order
             // if (payment.orderId) {
             //     await OrderModel.findByIdAndUpdate(payment.orderId, {
-            //     status: "refunded",
+            //     paymentStatus: "Refunded",
             //     });
             // }
 
@@ -97,10 +99,10 @@ export const paystackWebhookHandler = async (req: Request, res: Response) => {
                 {
                 metadata: {
                     refundFailure: {
-                    refundId: eventData.id,
-                    amount: eventData.amount / 100,
-                    failedAt: new Date(),
-                    reason: eventData.status || "unknown",
+                        refundId: eventData.id,
+                        amount: eventData.amount / 100,
+                        failedAt: new Date(),
+                        reason: eventData.status || "unknown",
                     },
                 },
             }

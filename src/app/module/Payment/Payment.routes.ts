@@ -4,18 +4,23 @@ import { verifyPaystackWebhook } from "../../middlewares/verifyPaystackWebhook";
 import { paystackWebhookHandler } from "./webhook.controller";
 
 const paymentRouter = express.Router();
+const webhookRouter = express.Router();
 
-paymentRouter.post("/initialize", createPayment);
-paymentRouter.get("/verify/:reference", verifyPaymentController);
-paymentRouter.post("/refund", refundController);
+paymentRouter.post("/initialize-payment", 
+        createPayment
+);
+
+paymentRouter.get("/verify-payment/:reference", verifyPaymentController);
+paymentRouter.post("/refund-payment", refundController);
+
 
 //webhook
 // RAW BODY MIDDLEWARE
 // router.use(express.raw({ type: "*/*" }));
-paymentRouter.post("/webhook-v1-9e8f0soubir2025",
+webhookRouter.post("/webhook-v1-9e8f0soubir2025",
         express.raw({type: "*/*"}),
         verifyPaystackWebhook, 
         paystackWebhookHandler
 );
 
-export default paymentRouter;
+export {paymentRouter,webhookRouter};

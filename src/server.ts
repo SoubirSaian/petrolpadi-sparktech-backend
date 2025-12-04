@@ -18,14 +18,15 @@ async function main() {
     //database connection
     await mongoDBConnection();
     // logger.info('DB Connected Successfully');
-    
+
     // call run cron job
     runCronJobEverydatAtNight();
+    console.log("Cron job scheduled.");
 
     myServer = app.listen(port, () => {
     //   logger.info(`Server running on http://0.0.0.0:${port}`);
     //   seedSuperAdmin();
-        console.log("Server hitting : http://10.10.20.57:8001");
+        console.log("Petrol padi server hitting : http://10.10.20.57:8001");
     });
 
 

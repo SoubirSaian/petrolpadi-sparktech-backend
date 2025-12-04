@@ -4,14 +4,14 @@ import cookieParser from 'cookie-parser';
 import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import notFound from './app/middlewares/notFound';
 import allRouter from './app/routes/allRoutes';
-import paymentRouter from './app/module/Payment/Payment.routes';
+import {webhookRouter} from './app/module/Payment/Payment.routes';
 
 
 
 const app: Application = express();
 
 //use webhook route before app.use(express.json())
-app.use("/paystack", paymentRouter);
+app.use("/paystack", webhookRouter);
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -25,7 +25,7 @@ app.use('/', allRouter);
 
 
 app.get('/', (req, res) => {
-  res.send("Server is running ---- Welcome --- Go Ahead");
+  res.send("Petrol padi server is running ---- Welcome --- Go Ahead");
 });
 
 

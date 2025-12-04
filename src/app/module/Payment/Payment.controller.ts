@@ -23,6 +23,9 @@ export const createPayment = async (req: Request, res: Response) => {
     });
     console.log("new payment ==== : ",payment);
 
+    //also add payment reference in the order
+    // add payment status in order
+
     if(!payment){
         throw new ApiError(500,"Failed to create new payment");
     }
@@ -100,6 +103,8 @@ export const refundController = async (req: Request, res: Response) => {
         { new: true }
     );
     console.log("after successfull refund payment data ====: ",payment);
+
+    //update payment status in the order model
 
     // if(!payment){
     //     throw new ApiError(500,"Failed to refund payment")
