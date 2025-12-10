@@ -22,3 +22,15 @@ export interface IPayment extends Document {
 //   createdAt: Date;
 //   updatedAt: Date;
 }
+
+export interface IPaymentPayload {
+  email: string;
+  amount: number;
+  metadata: {
+    orderId: string;
+    profileId: string;
+    [key: string]: any;
+  };
+  // profileId: string;
+  // orderId: string;
+}

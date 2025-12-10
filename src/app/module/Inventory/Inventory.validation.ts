@@ -24,8 +24,27 @@ const getFuelValidation = z.object({
   })
 });
 
+
+ const InventoryQueryValidation = z.object({
+  query: z.object({
+    supplierId: z.string().min(1, "Supplier ID is required"),
+
+    fuelType:  z.string().nonempty("Fuel type is required")
+      .refine(val => val === "Fuel" || val === "Diesel", {
+        message: "Fuel type must be either 'fuel' or 'diesel'",
+      }),
+
+    time:  z.string().nonempty("Time is required")
+          .refine(val => ["this-week", "this-month", "this-year"].includes(val), {
+            message: "Time must be one of: this-week, this-month, this-year",
+          }),
+  }),
+});
+
+
 const InventoryValidations = { 
     loadFuelValidation,
-    getFuelValidation
+    getFuelValidation,
+    InventoryQueryValidation
 };
 export default InventoryValidations;

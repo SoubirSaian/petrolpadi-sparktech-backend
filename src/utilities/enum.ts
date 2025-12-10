@@ -1,6 +1,8 @@
 export const ENUM_USER_ROLE = {
   CUSTOMER: 'Customer',
   SUPPLIER: 'Supplier',
+  ADMIN: 'Admin',
+  SUPER_ADMIN: 'Super_Admin'
 };
 
 export const ENUM_ORDER_STATUS = {
@@ -23,6 +25,7 @@ export const ENUM_PAYMENT_STATUS = {
   FAILED : "Failed",
   REFUNDED : "Refunded",
 }
+
 
 
 export const ENUM_USER_STATUS = {

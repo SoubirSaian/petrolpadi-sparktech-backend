@@ -17,4 +17,9 @@ inventoryRouter.get("/get-loaded-fuel",
         InventoryController.getLoadedFuel
 );
 
+inventoryRouter.get("/filter-inventory",
+        validateRequest(InventoryValidations.InventoryQueryValidation),
+        InventoryController.filterInventory
+);
+
 export default inventoryRouter;

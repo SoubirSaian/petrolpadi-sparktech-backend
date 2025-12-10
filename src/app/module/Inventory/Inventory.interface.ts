@@ -22,3 +22,15 @@ export interface ILoadFuel {
   fuelType: string;
   profileId: string;
 }
+
+
+type FuelType = "fuel" | "diesel";
+export type TimeRange = "this-week" | "this-month" | "this-year";
+
+export interface IInventoryQuery {
+  supplierId: string;
+  fuelType: FuelType;
+  time: TimeRange;
+}
+
+

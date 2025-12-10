@@ -1,49 +1,88 @@
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 import { initializePayment, verifyPayment, refundPayment } from "../../../helper/paystackHelper";
 import PaymentModel from "./Payment.model";
 import ApiError from "../../../error/ApiError";
 import { ENUM_PAYMENT_STATUS } from "../../../utilities/enum";
+import OrderModel from "../Order/Order.model";
 
-//initialize/create payment
+
+
 export const createPayment = async (req: Request, res: Response) => {
+  const session = await mongoose.startSession();
+
   try {
-    const { email, amount, metadata, profileId,orderId } = req.body;
+    session.startTransaction();
 
-    const result = await initializePayment(email, amount, metadata);
-    console.log("create payment data ======:",result);
+    const { email, amount, metadata, } = req.body;
 
-    //create a new payment
-    const payment = await PaymentModel.create({
-        customerId: profileId,
-        orderId,
-        amount,
-        reference: result.data.reference,
-        metadata,
-        status: ENUM_PAYMENT_STATUS.PENDING,
-    });
-    console.log("new payment ==== : ",payment);
+    // 1️⃣ Call Paystack initialize
+    const paystackResponse = await initializePayment(email, amount, metadata);
 
-    //also add payment reference in the order
-    // add payment status in order
-
-    if(!payment){
-        throw new ApiError(500,"Failed to create new payment");
+    if (!paystackResponse?.status || !paystackResponse?.data?.reference) {
+      throw new ApiError(500, "Failed to initialize Paystack payment");
     }
+
+    const reference = paystackResponse.data.reference;
+
+    // 2️⃣ Create payment record locally (atomic)
+    const payment = await PaymentModel.create(
+      [
+        {
+          customerId: metadata?.profileId,
+          orderId: metadata?.orderId,
+          amount,
+          reference,
+          metadata,
+          status: ENUM_PAYMENT_STATUS.PENDING,
+        },
+      ],
+      { session }
+    );
+
+    if (!payment || payment.length === 0) {
+      throw new ApiError(500, "Failed to create payment record");
+    }
+
+    // 3️⃣ Update the order with reference (atomic)
+    // const updatedOrder = await OrderModel.findByIdAndUpdate(
+    //   metadata.orderId,
+    //   {
+    //     $set: {
+    //       paymentStatus: "Pending",
+    //       paymentReference: reference,
+    //     },
+    //   },
+    //   { new: true, session }
+    // );
+
+    // if (!updatedOrder) {
+    //   throw new ApiError(500, "Failed to update order payment status");
+    // }
+
+    // 4️⃣ Commit all DB operations
+    await session.commitTransaction();
+    session.endSession();
 
     return res.status(200).json({
       status: "success",
-      message: "Payment initialized successfully.",
-      data: result,
+      message: "Payment initialized successfully",
+      data: paystackResponse,
     });
-
   } catch (error: any) {
-    console.log("Failed to initialized payment.");
+    console.log("Payment initialization failed:", error.message);
+
+    // rollback all DB operations
+    await session.abortTransaction();
+    session.endSession();
+
     return res.status(500).json({
       status: "error",
-      message: error.message,
+      message: error.message || "Failed to initialize payment",
     });
   }
 };
+
 
 //verify payment controller
 export const verifyPaymentController = async (req: Request, res: Response) => {
@@ -58,11 +97,11 @@ export const verifyPaymentController = async (req: Request, res: Response) => {
     const payment = await PaymentModel.findOneAndUpdate(
         { reference: reference },
         {
-        status: paystackData.status === "success" ? ENUM_PAYMENT_STATUS.SUCCESS : ENUM_PAYMENT_STATUS.FAILED,
-        channel: paystackData.channel,
-        transactionId: paystackData.id,
-        paidAt: paystackData.paid_at,
-        metadata: paystackData.metadata,
+          status: paystackData.data.status === "success" ? ENUM_PAYMENT_STATUS.SUCCESS : ENUM_PAYMENT_STATUS.FAILED,
+          channel: paystackData.data.channel,
+          transactionId: paystackData.data.id,
+          paidAt: paystackData.data.paid_at,
+          metadata: paystackData.data.metadata,
         },
         { new: true }
     );

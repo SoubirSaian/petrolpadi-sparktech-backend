@@ -1,9 +1,9 @@
+import mongoose from "mongoose";
 import ApiError from "../../../error/ApiError";
-import { IInventory, ILoadFuel } from "./Inventory.interface";
+import { IInventory, ILoadFuel,IInventoryQuery } from "./Inventory.interface";
 import InventoryModel from "./Inventory.model";
 import { ENUM_FUEL_TYPE } from "../../../utilities/enum";
 import SupplierModel from "../Supplier/Supplier.model";
-import mongoose from "mongoose";
 
 
 const loadFuelService = async (payload: ILoadFuel) => {
@@ -62,6 +62,135 @@ const getLoadedFuelService = async (query: Record<string,unknown>) => {
     return supplier;
 
 }
+
+
+
+export const filterInventoryService = async (query: Record<string,unknown>) => {
+
+  const {supplierId, fuelType, time} = query;
+
+  const supplier = new mongoose.Types.ObjectId(supplierId as string);
+
+  // -------------------------------
+  // 1️⃣ TIME RANGE CALCULATION
+  // -------------------------------
+
+  const now = new Date();
+  let startDate: Date;
+
+  if (time === "this-week") {
+    const day = now.getDay();          // 0 = Sunday
+    const diff = now.getDate() - day;  
+    startDate = new Date(now.getFullYear(), now.getMonth(), diff);
+  } 
+  else if (time === "this-month") {
+    startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  } 
+  else {
+    startDate = new Date(now.getFullYear(), 0, 1);
+  }
+
+  const matchStage = {
+    supplier: supplier,
+    createdAt: { $gte: startDate, $lte: now }
+  };
+
+  // ---------------------------------
+  // 2️⃣ FIELD SELECTION BASED ON FUEL TYPE
+  // ---------------------------------
+
+  const fieldMap = fuelType === "Fuel"
+    ? {
+        load: "$todayFuelLoad",
+        remaining: "$remainingFuelPreviousDay",
+        available: "$todayAvailableFuel",
+        delivery: "$todayFuelDelivery",
+        revenue: "$todayFuelRevenue",
+      }
+    : {
+        load: "$todayDieselLoad",
+        remaining: "$remainingDieselPreviousDay",
+        available: "$todayAvailableDiesel",
+        delivery: "$todayDieselDelivery",
+        revenue: "$todayDieselRevenue",
+      };
+
+  // ---------------------------------
+  // 3️⃣ AGGREGATION LOGIC
+  // ---------------------------------
+
+  // CASE 1: WEEK OR MONTH → return daily data
+  if (time === "this-week" || time === "this-month") {
+    const dailyStats = await InventoryModel.aggregate([
+      { $match: matchStage },
+      {
+        $project: {
+          date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          load: fieldMap.load,
+          remaining: fieldMap.remaining,
+          available: fieldMap.available,
+          delivery: fieldMap.delivery,
+          revenue: fieldMap.revenue,
+        },
+      },
+      { $sort: { date: 1 } }
+    ]);
+
+    return {
+      time,
+      type: fuelType,
+      supplierId,
+      data: dailyStats
+    };
+  }
+
+  // CASE 2: YEAR → month-wise aggregated totals
+  else if (time === "this-year") {
+    const yearlyStats = await InventoryModel.aggregate([
+      { $match: matchStage },
+
+      // Extract month number + month name + relevant fields
+      {
+        $project: {
+          monthNumber: { $month: "$createdAt" },
+          monthName: { $dateToString: { format: "%B", date: "$createdAt" } },
+          load: fieldMap.load,
+          remaining: fieldMap.remaining,
+          available: fieldMap.available,
+          delivery: fieldMap.delivery,
+          revenue: fieldMap.revenue,
+        },
+      },
+
+      // Group month-wise totals
+      {
+        $group: {
+          _id: "$monthNumber",
+          monthName: { $first: "$monthName" }, // Keep the month text
+          totalLoad: { $sum: "$load" },
+          totalRemaining: { $sum: "$remaining" },
+          totalAvailable: { $sum: "$available" },
+          totalDelivery: { $sum: "$delivery" },
+          totalRevenue: { $sum: "$revenue" },
+        },
+      },
+
+      // Sort by actual month number
+      { $sort: { _id: 1 } },
+    ]);
+
+    return {
+      time,
+      type: fuelType,
+      supplierId,
+      data: yearlyStats,
+    };
+  }
+
+
+  return null;
+};
+
 
 
 //generate inventory for every supplier at everyday night
@@ -186,6 +315,7 @@ export const resetSupplierDailyFieldsService = async (): Promise<void> => {
 const InventoryServices = { 
     loadFuelService,
     getLoadedFuelService,
+    filterInventoryService
     // generateDailyInventoryService
  };
 export default InventoryServices;

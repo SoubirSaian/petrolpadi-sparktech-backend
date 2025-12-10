@@ -3,6 +3,7 @@ import PaymentModel from "./Payment.model";
 import { ENUM_PAYMENT_STATUS } from "../../../utilities/enum";
 
 export const paystackWebhookHandler = async (req: Request, res: Response) => {
+
   const event = req.body.event;
   const eventData = req.body.data;
 
@@ -14,17 +15,25 @@ export const paystackWebhookHandler = async (req: Request, res: Response) => {
     
         // TODO: 
         // - update order/payment record in DB
-        const payment = await PaymentModel.findOneAndUpdate(
+        // Get existing payment record
+        const payment = await PaymentModel.findOne({ reference: eventData?.reference });
+
+        // Idempotency — avoid double update
+            if (payment.status === ENUM_PAYMENT_STATUS.SUCCESS) {
+                return res.status(200).send("Update payment already handled.");
+            }
+
+        const updatedPayment = await PaymentModel.findOneAndUpdate(
             { reference: eventData?.reference },
             {
-            status: ENUM_PAYMENT_STATUS.SUCCESS,
-            channel: eventData.channel,
-            transactionId: eventData.id,
-            paidAt: eventData.paid_at,
+                status: ENUM_PAYMENT_STATUS.SUCCESS,
+                channel: eventData.channel,
+                transactionId: eventData.id,
+                paidAt: eventData.paid_at,
             },
             { new: true }
         );
-        console.log("webhook payment data =====: ", payment);
+        console.log("webhook payment data =====: ", updatedPayment);
 
         // - send email to user
         // send notification to user, admin

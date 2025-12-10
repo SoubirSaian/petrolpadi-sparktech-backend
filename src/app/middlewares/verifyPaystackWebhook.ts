@@ -11,16 +11,16 @@ export const verifyPaystackWebhook = (req: Request, res: Response, next: NextFun
     // Extra layer: Validate IP
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
-    const PAYSTACK_IPS = [
-        "52.31.139.75",
-        "52.49.173.169",
-        "52.214.14.220",
-    ];
+    // const PAYSTACK_IPS = [
+    //     "52.31.139.75",
+    //     "52.49.173.169",
+    //     "52.214.14.220",
+    // ];
 
-    if (!PAYSTACK_IPS.includes(String(ip))) {
-        console.log("Blocked invalid IP:", ip);
-        return res.status(200).send("ignored: IP address is not valid");
-    }
+    // if (!PAYSTACK_IPS.includes(String(ip))) {
+    //     console.log("Blocked invalid IP:", ip);
+    //     return res.status(200).send("ignored: IP address is not valid");
+    // }
 
   //check paystack webhook secret
   const hash = crypto
@@ -28,7 +28,7 @@ export const verifyPaystackWebhook = (req: Request, res: Response, next: NextFun
     .update(JSON.stringify(req.body))
     .digest("hex");
 
-  if (hash === req.headers["x-paystack-signature"]) {
+  if (hash == req.headers["x-paystack-signature"]) {
     return next();
   }
 
