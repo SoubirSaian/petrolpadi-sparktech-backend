@@ -1,9 +1,10 @@
 import express from "express";
 import validateRequest from "../../middlewares/validateRequest";
-import auth from "../../middlewares/auth";
+import {auth} from "../../middlewares/auth";
 import { adminLoginValidation, changeAdminPasswordValidation, createAdminvalidation, editProfilevalidation } from "./Dashboard.validation";
 import DashboardController from "./Dashboard.controller";
 import AuthValidations from "../auth/auth.validation";
+import { uploadProfile } from "../../../helper/multerUpload";
 
 
 
@@ -38,6 +39,7 @@ dashboardRouter.patch("/admin-reset-password",
 
 dashboardRouter.patch("/edit-admin-profile",
     // auth(["Super_Admin"]),
+    uploadProfile.single('admin-image'),
     validateRequest(editProfilevalidation),
     DashboardController.editAdminProfile
 );

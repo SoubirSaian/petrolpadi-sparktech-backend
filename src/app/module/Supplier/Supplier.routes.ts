@@ -1,8 +1,9 @@
 import express from "express";
-import auth from "../../middlewares/auth";
+import {auth} from "../../middlewares/auth";
 import validateRequest from "../../middlewares/validateRequest";
 import SupplierValidations from "./Supplier.validation";
 import SupplierController from "./Supplier.controller";
+import { uploadDocument } from "../../../helper/multerUpload";
 
 
 const supplierRouter = express.Router();
@@ -28,10 +29,10 @@ supplierRouter.get("/get-fuel-rate",
   SupplierController.getFuelRate  
 );
 
-supplierRouter.post("/add-document",
-    
-    validateRequest(SupplierValidations.getRateValidation),
-  SupplierController.getFuelRate  
+supplierRouter.post("/upload-document",
+    //auth(["Supplier"]),
+  uploadDocument.single("supplier-file"),
+  SupplierController.uploadDocument
 );
 
 //dashboard

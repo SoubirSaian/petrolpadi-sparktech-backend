@@ -15,6 +15,7 @@ import { ICustomer } from "../Customer/Customer.interface";
 import SupplierModel from "../Supplier/Supplier.model";
 import { ISupplier } from "../Supplier/Supplier.interface";
 import { send } from "process";
+import { ENUM_USER_ROLE } from "../../../utilities/enum";
 
 
 const registerUserService = async (payload: IUser) => {
@@ -48,11 +49,11 @@ const registerUserService = async (payload: IUser) => {
 
         // Create user
         const [user] = await UserModel.create([userDataPayload], { session });
-
+        console.log(user);
         // Create profile (customer or provider)
         let profile;
 
-        if (role === 'Customer') {
+        if (role === ENUM_USER_ROLE.CUSTOMER) {
 
             const customerPayload = {
                 user: user._id,name,email,phone
@@ -60,17 +61,17 @@ const registerUserService = async (payload: IUser) => {
 
             [profile] = await CustomerModel.create([customerPayload], { session });
 
-        } else if(role === 'Supplier'){
+        } else if(role === ENUM_USER_ROLE.SUPPLIER){
             const providerPayload = {
                 user: user._id,name,email,phone
             };
             [profile] = await SupplierModel.create([providerPayload], { session });
         }
-
+        console.log(profile);
         // Link profile to user
         // await UserModel.findByIdAndUpdate(
         //     user._id,
-        //     { profileId: profile._id },
+        //     { profile: profile._id },
         //     { session }
         // );
         user.profile = profile._id;
@@ -108,7 +109,10 @@ const registerUserService = async (payload: IUser) => {
         await session.commitTransaction();
         session.endSession();
         
-        return {newUser};
+        return {
+            newUser,
+            // accessToken
+        };
         // return profile;
     } catch (error) {
         await session.abortTransaction();
@@ -235,7 +239,7 @@ const verifyCode = async (payload:{email: string, verifyCode: string}) => {
     //     config.jwt_refresh_expires_in as string
     // );
 
-    return  accessToken;
+    return  {user,accessToken};
 };
 
 const sendVerifyCodeService = async (payload:{email: string}) => {

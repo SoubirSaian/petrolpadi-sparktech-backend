@@ -1,5 +1,5 @@
 import express from "express";
-import auth from "../../middlewares/auth";
+import {auth} from "../../middlewares/auth";
 import validateRequest from "../../middlewares/validateRequest";
 import AuthValidations from "./auth.validation";
 import AuthController from "./auth.controller";

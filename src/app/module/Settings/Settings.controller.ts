@@ -15,6 +15,30 @@ const submitHelpAndSupport = catchAsync(async (req, res) => {
     });
 });
 
+const getHelpAndSupport = catchAsync(async (req, res) => {
+
+    const result = await SettingsServices.getHelpAndSupportService();
+    
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "retrieved all report.",
+        data: result,
+    });
+});
+
+const deleteHelpAndSupport = catchAsync(async (req, res) => {
+
+    const result = await SettingsServices.deleteHelpAndSupportService(req.params.supportId);
+    
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Deleted a report successfully.",
+        data: result,
+    });
+});
+
 //terms and consition
 
 const getTermsConditions = catchAsync(async (req: Request, res: Response) => {
@@ -70,6 +94,8 @@ const editTermsConditions = catchAsync(async (req: Request, res: Response) => {
 
 const SettingsController = { 
     submitHelpAndSupport,
+    getHelpAndSupport,
+    deleteHelpAndSupport,
     getTermsConditions,
     getPrivacyPolicy,
     editPrivacyPolicy,

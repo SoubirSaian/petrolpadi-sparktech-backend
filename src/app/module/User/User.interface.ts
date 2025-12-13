@@ -16,10 +16,16 @@ export interface IUser {
 
 export interface IAddLocation {
     location: string,
-    role: string,
-    userId: string
+    // role: string,
+    // userId: string
     // latitude?: string,
     // longitude?: string,
+}
+
+export interface IBankDetail {
+    bankName: string;
+    accountName: string;
+    accountNumber: string;
 }
 
 export interface IChangePassword {

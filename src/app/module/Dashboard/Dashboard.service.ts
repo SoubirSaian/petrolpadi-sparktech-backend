@@ -11,6 +11,7 @@ import SupplierModel from "../Supplier/Supplier.model";
 import OrderModel from "../Order/Order.model";
 import generateVerifyCode from "../../../utilities/codeGenerator";
 import { sendVerificationEmail } from "../../../helper/emailHelper";
+import deleteOldFile from "../../../utilities/deleteFile";
 
 
 
@@ -228,21 +229,26 @@ const adminResetPasswordService = async (payload: {
     return {user:{name:admin.name,email:admin.email,role:admin.role}, accessToken };
 };
 
-const editProfileService = async (userDetails: JwtPayload, payload: Partial<IAdmin>) => {
+const editProfileService = async (userDetails: JwtPayload,file: Express.Multer.File | undefined, payload: Partial<IAdmin>) => {
     const {userId} = userDetails;
 
     if(!userId){
         throw new ApiError(400,"Admin id is required to edit admin profile");
     }
 
-    const editedAdmin = await AdminModel.findByIdAndUpdate(userId,{
-        ...payload
-    },{new: true});
+    const admin = await AdminModel.findById(userId);
 
-    if(!editedAdmin){
-        throw new ApiError(500,"failed to update admin profile.");
+    // Handle image update
+    if (file) {
+        if (admin.image) { deleteOldFile(admin.image as string); }
+
+        admin.image = `uploads/admin-image/${file.filename}`;
     }
 
+    if(payload.name) admin.name = payload.name;
+
+    await admin.save();
+    
     return null;
     
 }

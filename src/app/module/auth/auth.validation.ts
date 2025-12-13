@@ -16,6 +16,10 @@ const registerUserValidationSchema = z.object({
       .string()
       .min(6, "Password must be at least 6 characters"),
 
+    confirmPassword: z
+      .string()
+      .min(6, "Password must be at least 6 characters"),
+
     phone: z
       .string()
       .min(1, "Contact number is required"),
@@ -25,13 +29,13 @@ const registerUserValidationSchema = z.object({
     }),
   })
   // validate that password === confirmPassword
-//   .refine(
-//     (data) => data.password === data.confirmPassword,
-//     {
-//       message: "Password and confirm password must match",
-//       path: ["confirmPassword"],
-//     }
-//   ),
+  .refine(
+    (data) => data.password === data.confirmPassword,
+    {
+      message: "Password and confirm password must match",
+      path: ["confirmPassword"],
+    }
+  ),
 });
 
 

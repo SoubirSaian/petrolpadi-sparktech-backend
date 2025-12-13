@@ -1,6 +1,6 @@
 import ApiError from "../../../error/ApiError";
 import { Express } from "express";
-import { IAddLocation, IChangePassword, IUser } from "./User.interface";
+import { IAddLocation, IBankDetail, IChangePassword, IUser } from "./User.interface";
 import UserModel from "./User.model";
 import CustomerModel from "../Customer/Customer.model";
 import SupplierModel from "../Supplier/Supplier.model";
@@ -54,10 +54,10 @@ const updateUserProfile = async (
     user.phone = phone;
   }
 
-  if (bankName) profile.bankName = bankName;
-  if (accountName) profile.accountName = accountName;
-  if (accountNumber) profile.accountNumber = accountNumber;
-  if (location) profile.location = location;
+  // if (bankName) profile.bankName = bankName;
+  // if (accountName) profile.accountName = accountName;
+  // if (accountNumber) profile.accountNumber = accountNumber;
+  // if (location) profile.location = location;
 
   // Handle image update
   if (file) {
@@ -70,29 +70,28 @@ const updateUserProfile = async (
 
   // Return a unified response
   return {
-    profile: {
       name: profile.name,
       email: user.email,
       location: profile.location,
-    },
   };
 };
 
 
-const addLocationService = async (payload: IAddLocation) => {
+const addLocationService = async (userDetails: JwtPayload,payload: IAddLocation) => {
     // Service logic goes here
-   const {location,role, userId} = payload;
+    const {profileId,role} = userDetails;
+   const {location} = payload;
 
     let profile : ICustomer| ISupplier | null = null;
 
     switch (role) {
 
         case ENUM_USER_ROLE.CUSTOMER:
-             profile = await CustomerModel.findByIdAndUpdate(userId, {location: location}, {new: true});
+             profile = await CustomerModel.findByIdAndUpdate(profileId, {location: location}, {new: true});
             break;
 
         case ENUM_USER_ROLE.SUPPLIER:
-            profile = await SupplierModel.findByIdAndUpdate(userId, {location: location}, {new: true});
+            profile = await SupplierModel.findByIdAndUpdate(profileId, {location: location}, {new: true});
             break;
              
         default:{
@@ -106,7 +105,42 @@ const addLocationService = async (payload: IAddLocation) => {
         throw new ApiError(500,'Failed to add location in the profile');
     }  
 
-    return {profile:{ name:profile.name,email:profile.email, location: profile.location }};
+    return { name:profile.name,email:profile.email, location: profile.location };
+}
+
+
+const addBankDetailService = async (userDetails: JwtPayload,payload: IBankDetail) => {
+    // Service logic goes here
+    const {profileId,role} = userDetails;
+  // console.log(payload);
+
+    let profile : ICustomer| ISupplier | null = null;
+
+    switch (role) {
+        case ENUM_USER_ROLE.CUSTOMER:
+             profile = await CustomerModel.findByIdAndUpdate(profileId,{
+              $set: payload
+             } , {new: true});
+            break;
+
+        case ENUM_USER_ROLE.SUPPLIER:
+            profile = await SupplierModel.findByIdAndUpdate(profileId, {
+              $set: payload
+            }, {new: true});
+            break;
+             
+        default:{
+            // const _exhaustiveCheck: never = role;
+            throw new ApiError(400, "Invalid user role");
+        }
+
+    }
+    // console.log(profile);
+    if(!profile){
+        throw new ApiError(500,'Failed to add location in the profile');
+    }  
+
+    return { name:profile.name,email:profile.email, location: profile.location };
 }
 
 const changePasswordService = async (userDetails: JwtPayload, payload: IChangePassword) => {
@@ -136,6 +170,7 @@ const changePasswordService = async (userDetails: JwtPayload, payload: IChangePa
 const UserServices = {
     updateUserProfile, 
     addLocationService,
+    addBankDetailService,
     changePasswordService 
 };
 export default UserServices;

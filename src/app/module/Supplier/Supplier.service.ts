@@ -1,3 +1,4 @@
+import { JwtPayload } from "jsonwebtoken";
 import ApiError from "../../../error/ApiError";
 import { ENUM_FUEL_TYPE } from "../../../utilities/enum";
 import UserModel from "../User/User.model";
@@ -153,6 +154,23 @@ const getFuelRateService = async (query: Record<string,unknown>) => {
 
 }
 
+const uploadDocumentService = async (userDetails: JwtPayload, file: Express.Multer.File | undefined) => {
+    const {profileId} = userDetails;
+
+    const supplier = await SupplierModel.findById(profileId).select("name email document");
+
+    // Handle image update
+  if (file) {
+    // if (profile.image) deleteOldFile(profile.image as string);
+    supplier.document = `uploads/supplier-file/${file.filename}`;
+  }
+
+  await supplier.save();
+
+  return supplier;
+
+}
+
 //dashboard
 
 const getSupplierRequestService = async () => {
@@ -216,6 +234,7 @@ const SupplierServices = {
     supplierDetailService,
     addFuelRateService,
     getFuelRateService,
+    uploadDocumentService,
     getAllSupplierService,
     getSupplierRequestService,
     getSupplierDetailsService,

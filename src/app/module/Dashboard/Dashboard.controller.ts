@@ -67,39 +67,39 @@ const adminResetPassword = catchAsync(async (req, res) => {
 
 const editAdminProfile = catchAsync(
     async (req,res) => {
-        const result = await DashboardService.editProfileService(req.user,req.body);
+        // const result = await DashboardService.editProfileService(req.user,req.file,req.body);
 
         sendResponse(res,{
             statusCode: 200,
             success: true,
             message: "Updated admin data successfully",
-            data: result
+            data: null
         });
     }
 );
 
 const changeAdminPassword = catchAsync(
     async (req,res) => {
-        const result = await DashboardService.changeAdminPasswordService(req.user,req.body);
+        // const result = await DashboardService.changeAdminPasswordService(req.user,req.body);
 
         sendResponse(res,{
             statusCode: 200,
             success: true,
             message: "Admin password changed successfully",
-            data: result
+            data: null
         });
     }
 );
 
 const deleteAdminAccount = catchAsync(
     async (req,res) => {
-        const result = await DashboardService.deleteAdminService(req.user);
+        // const result = await DashboardService.deleteAdminService(req.user);
 
         sendResponse(res,{
             statusCode: 200,
             success: true,
             message: "Admin deleted successfully.",
-            data: result
+            data: null
         });
     }
 );

@@ -1,5 +1,5 @@
 import express from "express";
-import auth from "../../middlewares/auth";
+import {auth} from "../../middlewares/auth";
 import validateRequest from "../../middlewares/validateRequest";
 import SettingsValidations from "./Settings.validation";
 import SettingsController from "./Settings.controller";
@@ -15,6 +15,19 @@ settingsRouter.post(
     SettingsController.submitHelpAndSupport
 );
 
+settingsRouter.get(
+    "/get-help-and-support",
+    // auth(),
+    // validateRequest(SettingsValidations.helpAndSupportValidation),
+    SettingsController.getHelpAndSupport
+);
+settingsRouter.delete(
+    "/delete-help-and-support/:supportId",
+    // auth(),
+    // validateRequest(SettingsValidations.helpAndSupportValidation),
+    SettingsController.deleteHelpAndSupport
+);
+
 
 //privacy policy
 settingsRouter.get(
@@ -23,7 +36,7 @@ settingsRouter.get(
 );
 
 settingsRouter.patch(
-    "/update-privacy-policy",
+    "/update-privacy-policy/:id",
     validateRequest(SettingsValidations.settingsValidationSchema),
     SettingsController.editPrivacyPolicy
 );
@@ -35,7 +48,7 @@ settingsRouter.get(
 );
 
 settingsRouter.patch(
-    "/update-terms-and-conditions",
+    "/update-terms-and-conditions/:id",
     validateRequest(SettingsValidations.settingsValidationSchema),
     SettingsController.editTermsConditions
 );

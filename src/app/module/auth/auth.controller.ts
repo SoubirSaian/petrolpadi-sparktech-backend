@@ -33,14 +33,14 @@ const verifyCode = catchAsync(async (req, res) => {
     sendResponse(res, {
         statusCode: 200,
         success: true,
-        message: "Added user information successfully.",
+        message: "Email verified successfully.",
         data: result,
     });
 });
 
 const sendVerifyCode = catchAsync(async (req, res) => {
     
-    const result = await authServices.verifyCode(req.body);
+    const result = await authServices.sendVerifyCodeService(req.body);
 
     sendResponse(res, {
         statusCode: 200,

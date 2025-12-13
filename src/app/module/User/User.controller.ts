@@ -1,22 +1,40 @@
 import catchAsync from "../../../utilities/catchasync";
 import sendResponse from "../../../utilities/sendResponse";
+import { AuthRequest } from "../../../interface/authRequest";
 import UserServices from "./User.service";
 
 const addLocation = catchAsync(async (req, res) => {
 
-    const result = await UserServices.addLocationService(req.body);
+     const { user } = req as AuthRequest;
+
+    const result = await UserServices.addLocationService(user,req.body);
     
     sendResponse(res, {
         statusCode: 200,
         success: true,
         message: "Location added successfully.",
+        data: result
+    });
+});
+
+const addBankDetail = catchAsync(async (req, res) => {
+     const { user } = req as AuthRequest;
+
+    const result = await UserServices.addBankDetailService(user,req.body);
+    
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Bank detail added successfully.",
         data: result,
     });
 });
 
 const updateProfile = catchAsync(async (req, res) => {
 
-    const result = await UserServices.updateUserProfile(req.user ,req.file, req.body);
+     const { user } = req as AuthRequest;
+
+    const result = await UserServices.updateUserProfile(user ,req.file, req.body);
     
     sendResponse(res, {
         statusCode: 200,
@@ -28,7 +46,9 @@ const updateProfile = catchAsync(async (req, res) => {
 
 const changePassword = catchAsync(async (req, res) => {
 
-    const result = await UserServices.changePasswordService(req.user,req.body);
+     const { user } = req as AuthRequest;
+
+    const result = await UserServices.changePasswordService(user,req.body);
     
     sendResponse(res, {
         statusCode: 200,
@@ -40,6 +60,7 @@ const changePassword = catchAsync(async (req, res) => {
 
 const UserController = { 
     addLocation,
+    addBankDetail,
     updateProfile,
     changePassword
  };

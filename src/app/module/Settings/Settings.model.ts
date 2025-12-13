@@ -33,9 +33,6 @@ const termsAndConditionsSchema = new Schema<ISettings>(
   },
   {
     timestamps: true,
-    toJSON: {
-      virtuals: true,
-    },
   },
 );
 

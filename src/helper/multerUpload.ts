@@ -13,15 +13,6 @@ import path from 'path';
    destination: function (req: Request, file, cb) {
        let uploadPath = `uploads/${file.fieldname}`;
  
-      //  if (file.fieldname === 'profile-image') {
-         
-      //    uploadPath = 'uploads/profile-image';
- 
-      //  } else if (file.fieldname === 'admin-image') {
- 
-      //    uploadPath = 'uploads/admin-image';
-      //  }
- 
        cb(null, uploadPath);
    },
  
@@ -52,6 +43,28 @@ import path from 'path';
  
        } else {
          cb(new Error("Only .jpg, .png or .jpeg format allowed!"));
+       }
+     
+   },
+ });
+
+ // preapre the final multer upload object
+ export const uploadDocument = multer({
+   storage: profileStorage,
+ 
+   limits: {
+     fileSize: 3145728, // 3MB . less than 3mb file allowed
+    //  fieldSize: 3 * 1024 *1024
+   },
+ 
+   fileFilter: (req, file, cb) => {
+    
+       if (file.mimetype === "application/pdf" ) {
+ 
+         cb(null, true);
+ 
+       } else {
+         cb(new Error("Only pdf file format allowed!"));
        }
      
    },

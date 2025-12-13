@@ -5,7 +5,7 @@ import config from "../../../config";
 import { ENUM_USER_ROLE } from "../../../utilities/enum";
 
 const UserSchema = new Schema<IUser>({
-    profile: { type: Schema.Types.ObjectId, ref: "User",default: '' },
+    profile: { type: Schema.Types.ObjectId, ref: "User" },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },

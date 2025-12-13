@@ -14,6 +14,24 @@ const submitHelpAndSupportService = async (payload: IHelpAndSupport) => {
     return result;
 };
 
+const getHelpAndSupportService = async () => {
+
+    const result = await SettingsModel.HelpAndSupportModel.find({}).lean();
+
+    return result;
+};
+
+const deleteHelpAndSupportService = async (id: string) => {
+
+    const result = await SettingsModel.HelpAndSupportModel.findByIdAndDelete(id);
+
+    if (!result) {
+        throw new ApiError(500, "Failed to delete this report.");
+    }
+
+    return result;
+};
+
 
 //! Privacy and policy
 
@@ -63,6 +81,8 @@ const editTermsConditions = async (id: string,payload: ISettings) => {
 
 const SettingsServices = { 
     submitHelpAndSupportService,
+    getHelpAndSupportService,
+    deleteHelpAndSupportService,
     getPrivacyPolicy,
     editPrivacyPolicy,
     getTermsConditions,

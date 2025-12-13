@@ -3,10 +3,10 @@ import { z } from "zod";
 const helpAndSupportValidation = z.object({
     body: z.object({
         name: z.string().min(1, "Name is required"),
-        email: z.string().trim().toLowerCase().email("Invalid email address"),
+        email: z.string().trim().email("Invalid email address").transform((val) => val.toLowerCase()),
         description: z.string().min(1, "Description is required")
         
-    }),
+    })
 });
 
 const settingsValidationSchema = z.object({

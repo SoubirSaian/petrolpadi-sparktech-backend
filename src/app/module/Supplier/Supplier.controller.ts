@@ -50,6 +50,18 @@ const getFuelRate = catchAsync(async (req, res) => {
     });
 });
 
+const uploadDocument = catchAsync(async (req, res) => {
+    
+    // const result = await SupplierServices.uploadDocumentService(req.user,req.file);
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Document added successfully.",
+        data: null,
+    });
+});
+
 // dashboard
 
 const getAllSupplier = catchAsync(async (req, res) => {
@@ -117,6 +129,7 @@ const SupplierController = {
     supplierDetails,
     addFuelRate,
     getFuelRate,
+    uploadDocument,
     getAllSupplier,
     getAllSupplierRequest,
     getSupplierDetails,

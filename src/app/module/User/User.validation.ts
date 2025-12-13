@@ -13,11 +13,19 @@ export const updateprofileValidation = z.object({
 
 export const addLocationValidation = z.object({
     body: z.object({
-        role: z.string().min(1, "Role is required"),
+        // role: z.string().min(1, "Role is required"),
         location: z.string().min(1, "Location is required"),
-        userId: z.string().min(1, "userId is required"),
+        // userId: z.string().min(1, "userId is required"),
         // latitude: z.string().min(1, "Latitude is required"),
         // longitude: z.string().min(1, "Longitude is required"),
+    }),
+});
+
+export const addBankDetailValidation = z.object({
+    body: z.object({
+        bankName: z.string().min(1, "Bank name is required"),
+        accountName: z.string().min(1, "Account name is required"),
+        accountNumber: z.string().min(1, "Account number is required"),
     }),
 });
 
@@ -38,5 +46,5 @@ const changePasswordValidation = z.object({
       ),
 });
 
-const UserValidations = { updateprofileValidation,addLocationValidation,changePasswordValidation };
+const UserValidations = { updateprofileValidation,addLocationValidation, addBankDetailValidation, changePasswordValidation };
 export default UserValidations;
